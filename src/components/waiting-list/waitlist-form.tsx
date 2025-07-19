@@ -1,28 +1,58 @@
 "use client";
 
 import type React from "react";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { api } from "@/trpc/react";
 
 export function WaitlistForm() {
   const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [isJoined, setIsJoined] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    const joined = localStorage.getItem("waitlist-joined") === "true";
+    if (joined) {
+      setIsJoined(true);
+      setMessage("You’ve already joined the waitlist!");
+    }
+  }, []);
+
+  const joinWaitlist = api.waitlist.joinWaitlist.useMutation({
+    onMutate: () => {
+      setIsSubmitting(true);
+    },
+    onSuccess: (data) => {
+      setMessage(data.message);
+      setEmail("");
+      setIsJoined(true);
+      localStorage.setItem("waitlist-joined", "true");
+    },
+    onError: (error) => {
+      setMessage(error.message);
+    },
+    onSettled: () => {
+      setIsSubmitting(false);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Here you would typically send the email to your backend
-    console.log("Email submitted:", email);
-
-    setIsSubmitting(false);
-    setEmail("");
+    setMessage("");
+    joinWaitlist.mutate({ email });
   };
+
+  if (isJoined) {
+    return (
+      <div className="w-full max-w-md mx-auto space-y-4">
+        <p className="text-center text-base text-foreground font-medium">
+          🎉 {message}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md mx-auto space-y-4">
@@ -31,9 +61,12 @@ export function WaitlistForm() {
           type="email"
           placeholder="enter your email address"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setMessage("");
+          }}
           required
-          className="h-12 px-4  bg-background border-2 border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
+          className="h-12 px-4 bg-background border-2 border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
         />
 
         <Button
@@ -43,11 +76,11 @@ export function WaitlistForm() {
         >
           {isSubmitting ? "joining..." : "join the waitlist"}
         </Button>
-      </form>
 
-      <p className="text-sm text-muted-foreground text-center">
-        no spam, just updates on our launch. unsubscribe anytime.
-      </p>
+        {message && (
+          <p className="text-sm text-center text-muted-foreground">{message}</p>
+        )}
+      </form>
     </div>
   );
 }

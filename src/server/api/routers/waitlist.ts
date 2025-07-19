@@ -1,5 +1,4 @@
 import { z } from "zod";
-
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { waitingList } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
