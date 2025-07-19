@@ -17,7 +17,7 @@ export default function HomePage() {
               </div>
               <WaitlistForm />
               <p className="text-xs text-center text-muted-foreground px-4">
-                no spam, just updates on our launch. unsubscribe anytime.
+                no spam, just updates on our launch.
               </p>
             </div>
           </div>
