@@ -1,8 +1,8 @@
-import { Twitter, Linkedin, MessageCircle, Github, Mail } from "lucide-react";
+import { Twitter, MessageCircle, Github } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="fixed bottom-8 left-1/2 transform -translate-x-1/2">
+    <footer className="lg:fixed lg:bottom-8 lg:left-1/2 lg:transform lg:-translate-x-1/2 pb-8 lg:pb-0">
       <div className="flex flex-col items-center space-y-4">
         <div className="flex items-center space-x-4">
           <a
@@ -14,7 +14,6 @@ export function Footer() {
           >
             <Twitter className="w-5 h-5" />
           </a>
-
           <a
             href="https://github.com/ronitrajfr/designhunt"
             target="_blank"
@@ -24,7 +23,6 @@ export function Footer() {
           >
             <Github className="w-5 h-5" />
           </a>
-
           <a
             href="https://discord.gg/designhunt"
             target="_blank"
@@ -35,7 +33,6 @@ export function Footer() {
             <MessageCircle className="w-5 h-5" />
           </a>
         </div>
-
         <p className="text-xs text-muted-foreground">© 2025 designhunt</p>
       </div>
     </footer>
