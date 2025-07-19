@@ -15,6 +15,13 @@
       "when": 1752905991885,
       "tag": "0001_dear_princess_powerful",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752913274945,
+      "tag": "0002_amusing_tomas",
+      "breakpoints": true
     }
   ]
 }

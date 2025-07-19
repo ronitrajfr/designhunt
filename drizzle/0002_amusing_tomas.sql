@@ -1,0 +1,1 @@
+ALTER TABLE "designhunt_waitlist" ADD COLUMN "unsubToken" varchar(255) NOT NULL;

@@ -39,7 +39,7 @@ export function WaitlistForm() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full h-12 bg-accent hover:bg-accent-foreground hover:text-primary-foreground text-accent-foreground rounded-lg font-medium transition-all duration-300 disabled:opacity-50"
+          className="w-full h-12 bg-accent border-2 border-border hover:bg-accent-foreground hover:text-primary-foreground text-accent-foreground rounded-lg font-medium transition-all duration-300 disabled:opacity-50"
         >
           {isSubmitting ? "joining..." : "join the waitlist"}
         </Button>

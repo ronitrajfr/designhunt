@@ -125,4 +125,8 @@ export const waitingList = createTable("waitlist", (d) => ({
   })
     .notNull()
     .defaultNow(),
+  unsubToken: d
+    .varchar({ length: 255 })
+    .notNull()
+    .$defaultFn(() => crypto.randomUUID()),
 }));
