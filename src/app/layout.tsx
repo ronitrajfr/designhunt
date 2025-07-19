@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import Providers from "./_components/Provider";
 import { TRPCReactProvider } from "@/trpc/react";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "designhunt - join the waitlist",
@@ -34,7 +35,10 @@ export default function RootLayout({
     <html lang="en" className={`${geist.variable}`}>
       <Providers>
         <body>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <TRPCReactProvider>
+            {children}
+            <Analytics />
+          </TRPCReactProvider>
         </body>
       </Providers>
     </html>
