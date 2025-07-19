@@ -6,7 +6,7 @@ export function Footer() {
       <div className="flex flex-col items-center space-y-4">
         <div className="flex items-center space-x-4">
           <a
-            href="https://twitter.com/ronitrajfr"
+            href="https://twitter.com/designhuntHQ"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-primary transition-colors"
