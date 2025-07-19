@@ -1,4 +1,4 @@
-import { Twitter, Linkedin, MessageCircle } from "lucide-react";
+import { Twitter, Linkedin, MessageCircle, Github, Mail } from "lucide-react";
 
 export function Footer() {
   return (
@@ -6,7 +6,7 @@ export function Footer() {
       <div className="flex flex-col items-center space-y-4">
         <div className="flex items-center space-x-4">
           <a
-            href="https://twitter.com/designhunt"
+            href="https://twitter.com/ronitrajfr"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-primary transition-colors"
@@ -16,13 +16,13 @@ export function Footer() {
           </a>
 
           <a
-            href="https://linkedin.com/company/designhunt"
+            href="https://github.com/ronitrajfr/designhunt"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="LinkedIn"
           >
-            <Linkedin className="w-5 h-5" />
+            <Github className="w-5 h-5" />
           </a>
 
           <a
