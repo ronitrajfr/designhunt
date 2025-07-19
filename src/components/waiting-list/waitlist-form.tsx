@@ -9,16 +9,7 @@ import { api } from "@/trpc/react";
 export function WaitlistForm() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [isJoined, setIsJoined] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const joined = localStorage.getItem("waitlist-joined") === "true";
-    if (joined) {
-      setIsJoined(true);
-      setMessage("You’ve already joined the waitlist!");
-    }
-  }, []);
 
   const joinWaitlist = api.waitlist.joinWaitlist.useMutation({
     onMutate: () => {
@@ -27,8 +18,6 @@ export function WaitlistForm() {
     onSuccess: (data) => {
       setMessage(data.message);
       setEmail("");
-      setIsJoined(true);
-      localStorage.setItem("waitlist-joined", "true");
     },
     onError: (error) => {
       setMessage(error.message);
@@ -43,16 +32,6 @@ export function WaitlistForm() {
     setMessage("");
     joinWaitlist.mutate({ email });
   };
-
-  if (isJoined) {
-    return (
-      <div className="w-full max-w-md mx-auto space-y-4">
-        <p className="text-center text-base text-foreground font-medium">
-          🎉 {message}
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-md mx-auto space-y-4">
@@ -72,7 +51,9 @@ export function WaitlistForm() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full h-12 bg-accent border-2 border-border hover:bg-accent-foreground hover:text-primary-foreground text-accent-foreground rounded-lg font-medium transition-all duration-300 disabled:opacity-50"
+          className={`w-full h-12 bg-accent border-2 border-border hover:bg-accent-foreground hover:text-primary-foreground text-accent-foreground rounded-lg font-medium transition-all duration-300 ${
+            isSubmitting ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          }`}
         >
           {isSubmitting ? "joining..." : "join the waitlist"}
         </Button>
