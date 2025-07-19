@@ -1,4 +1,4 @@
-import { Twitter, MessageCircle, Github } from "lucide-react";
+import { Twitter, Mail, Github } from "lucide-react";
 
 export function Footer() {
   return (
@@ -24,13 +24,13 @@ export function Footer() {
             <Github className="w-5 h-5" />
           </a>
           <a
-            href="https://discord.gg/designhunt"
+            href="mailto:ronitrajofficial7@gmail.com"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="Discord"
           >
-            <MessageCircle className="w-5 h-5" />
+            <Mail className="w-5 h-5" />
           </a>
         </div>
         <p className="text-xs text-muted-foreground">© 2025 designhunt</p>
