@@ -4,22 +4,49 @@ import {
   pgTableCreator,
   primaryKey,
   timestamp,
+  serial,
+  varchar,
+  boolean,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccount } from "next-auth/adapters";
 
-/**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
- */
 export const createTable = pgTableCreator((name) => `designhunt_${name}`);
+
+export const users = createTable("user", (d) => ({
+  id: d
+    .varchar({ length: 255 })
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: d.varchar({ length: 255 }),
+  email: d.varchar({ length: 255 }).notNull(),
+  emailVerified: d.timestamp({ mode: "date", withTimezone: true }),
+  image: d.varchar({ length: 255 }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  posts: many(posts),
+}));
 
 export const posts = createTable(
   "post",
   (d) => ({
     id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-    name: d.varchar({ length: 256 }),
+    title: d.varchar({ length: 256 }).notNull(),
+    slug: d.varchar({ length: 256 }).notNull(),
+    tagline: d.varchar({ length: 512 }),
+    productLink: d.varchar({ length: 512 }),
+    launchTag: d.varchar({ length: 128 }),
+    opensourceLink: d.varchar({ length: 512 }),
+    figmaLink: d.varchar({ length: 512 }),
+    p5Js: d.varchar({ length: 512 }),
+    firstComment: d.text(),
+    media: d.jsonb(),
+    youtube: d.varchar({ length: 512 }),
+    coverImage: d.varchar({ length: 512 }),
+    status: d.varchar({ length: 16 }).notNull().default("published"),
+    scheduledAt: d.timestamp({ withTimezone: true }),
     createdById: d
       .varchar({ length: 255 })
       .notNull()
@@ -32,29 +59,48 @@ export const posts = createTable(
   }),
   (t) => [
     index("created_by_idx").on(t.createdById),
-    index("name_idx").on(t.name),
+    index("title_idx").on(t.title),
+    index("launch_tag_idx").on(t.launchTag),
+    index("slug_idx").on(t.slug),
+    index("status_idx").on(t.status),
   ]
 );
 
-export const users = createTable("user", (d) => ({
-  id: d
-    .varchar({ length: 255 })
-    .notNull()
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: d.varchar({ length: 255 }),
-  email: d.varchar({ length: 255 }).notNull(),
-  emailVerified: d
-    .timestamp({
-      mode: "date",
-      withTimezone: true,
-    })
-    .default(sql`CURRENT_TIMESTAMP`),
-  image: d.varchar({ length: 255 }),
+export const postsRelations = relations(posts, ({ many, one }) => ({
+  createdBy: one(users, {
+    fields: [posts.createdById],
+    references: [users.id],
+  }),
+  postTags: many(postTags),
 }));
 
-export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
+export const tags = createTable("tag", (d) => ({
+  id: d.serial().primaryKey(),
+  name: d.varchar({ length: 50 }).notNull().unique(),
+}));
+
+export const postTags = createTable(
+  "post_tag",
+  (d) => ({
+    postId: d
+      .integer()
+      .references(() => posts.id)
+      .notNull(),
+    tagId: d
+      .integer()
+      .references(() => tags.id)
+      .notNull(),
+  }),
+  (t) => [primaryKey({ columns: [t.postId, t.tagId] })]
+);
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+  postTags: many(postTags),
+}));
+
+export const postTagsRelations = relations(postTags, ({ one }) => ({
+  post: one(posts, { fields: [postTags.postId], references: [posts.id] }),
+  tag: one(tags, { fields: [postTags.tagId], references: [tags.id] }),
 }));
 
 export const accounts = createTable(
