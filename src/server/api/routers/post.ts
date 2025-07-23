@@ -4,12 +4,13 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { createPostSchema } from "@/types";
 import { eq } from "drizzle-orm";
 import { getRateLimiter } from "@/utils/rate-limit";
 import { getIp } from "@/utils/ip";
 import { redis } from "@/utils/rate-limit";
 import { TRPCError } from "@trpc/server";
-import { posts, waitingList } from "@/server/db/schema";
+import { posts } from "@/server/db/schema";
 
 export const postRouter = createTRPCRouter({
   getPost: publicProcedure
@@ -43,5 +44,32 @@ export const postRouter = createTRPCRouter({
       await redis.set(token, JSON.stringify(post[0]), { ex: 300 });
 
       return post[0];
+    }),
+  createPost: protectedProcedure
+    .input(createPostSchema)
+    .mutation(async ({ input, ctx }) => {
+      const limiter = getRateLimiter("create-post");
+
+      if (limiter) {
+        const ip = getIp(ctx.headers);
+        const { success } = await limiter.limit(ip);
+
+        if (!success) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many requests. Please try again later.",
+          });
+        }
+      }
+
+      const [newPost] = await ctx.db
+        .insert(posts)
+        .values({
+          ...input,
+          createdById: ctx.session.user.id,
+        })
+        .returning();
+
+      return { success: true, message: "Post created", data: newPost };
     }),
 });

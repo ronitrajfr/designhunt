@@ -4,9 +4,6 @@ import {
   pgTableCreator,
   primaryKey,
   timestamp,
-  serial,
-  varchar,
-  boolean,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccount } from "next-auth/adapters";
 
@@ -45,7 +42,8 @@ export const posts = createTable(
     media: d.jsonb(),
     youtube: d.varchar({ length: 512 }),
     coverImage: d.varchar({ length: 512 }),
-    status: d.varchar({ length: 16 }).notNull().default("published"),
+    status: d.varchar().notNull().default("published"),
+    tag: d.varchar().notNull(),
     scheduledAt: d.timestamp({ withTimezone: true }),
     createdById: d
       .varchar({ length: 255 })
@@ -63,44 +61,15 @@ export const posts = createTable(
     index("launch_tag_idx").on(t.launchTag),
     index("slug_idx").on(t.slug),
     index("status_idx").on(t.status),
+    index("tag_idx").on(t.tag),
   ]
 );
 
-export const postsRelations = relations(posts, ({ many, one }) => ({
+export const postsRelations = relations(posts, ({ one }) => ({
   createdBy: one(users, {
     fields: [posts.createdById],
     references: [users.id],
   }),
-  postTags: many(postTags),
-}));
-
-export const tags = createTable("tag", (d) => ({
-  id: d.serial().primaryKey(),
-  name: d.varchar({ length: 50 }).notNull().unique(),
-}));
-
-export const postTags = createTable(
-  "post_tag",
-  (d) => ({
-    postId: d
-      .integer()
-      .references(() => posts.id)
-      .notNull(),
-    tagId: d
-      .integer()
-      .references(() => tags.id)
-      .notNull(),
-  }),
-  (t) => [primaryKey({ columns: [t.postId, t.tagId] })]
-);
-
-export const tagsRelations = relations(tags, ({ many }) => ({
-  postTags: many(postTags),
-}));
-
-export const postTagsRelations = relations(postTags, ({ one }) => ({
-  post: one(posts, { fields: [postTags.postId], references: [posts.id] }),
-  tag: one(tags, { fields: [postTags.tagId], references: [tags.id] }),
 }));
 
 export const accounts = createTable(
@@ -165,10 +134,7 @@ export const waitingList = createTable("waitlist", (d) => ({
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   email: d.varchar({ length: 255 }).notNull(),
-  joinedAt: timestamp("joined_at", {
-    mode: "date",
-    withTimezone: true,
-  })
+  joinedAt: timestamp("joined_at", { mode: "date", withTimezone: true })
     .notNull()
     .defaultNow(),
   unsubToken: d
