@@ -7,6 +7,7 @@ import {
 import { eq } from "drizzle-orm";
 import { getRateLimiter } from "@/utils/rate-limit";
 import { getIp } from "@/utils/ip";
+import { redis } from "@/utils/rate-limit";
 import { TRPCError } from "@trpc/server";
 import { posts, waitingList } from "@/server/db/schema";
 
@@ -19,6 +20,13 @@ export const postRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const slug = input.slug;
+
+      const token = `posts:${slug}`;
+      const cachedData: string | null = await redis.get(token);
+
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
       const post = await ctx.db
         .select()
         .from(posts)
@@ -31,6 +39,8 @@ export const postRouter = createTRPCRouter({
           message: "No post found with that slug",
         });
       }
+
+      await redis.set(token, JSON.stringify(post[0]), { ex: 300 });
 
       return post[0];
     }),
