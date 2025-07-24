@@ -142,3 +142,95 @@ export const waitingList = createTable("waitlist", (d) => ({
     .notNull()
     .$defaultFn(() => crypto.randomUUID()),
 }));
+
+export const upvotes = createTable(
+  "upvote",
+  (d) => ({
+    id: d
+      .varchar({ length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => users.id),
+    postId: d.integer().references(() => posts.id),
+    commentId: d.varchar({ length: 255 }),
+    createdAt: d.timestamp({ withTimezone: true }).defaultNow().notNull(),
+  }),
+  (t) => [
+    index("upvote_user_id_idx").on(t.userId),
+    index("upvote_post_id_idx").on(t.postId),
+    index("upvote_comment_id_idx").on(t.commentId),
+  ]
+);
+
+export const comments = createTable(
+  "comment",
+  (d) => ({
+    id: d
+      .varchar({ length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    postId: d
+      .integer()
+      .notNull()
+      .references(() => posts.id),
+    userId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => users.id),
+    content: d.text().notNull(),
+    createdAt: d.timestamp({ withTimezone: true }).defaultNow().notNull(),
+  }),
+  (t) => [
+    index("comment_post_id_idx").on(t.postId),
+    index("comment_user_id_idx").on(t.userId),
+  ]
+);
+
+export const replies = createTable(
+  "reply",
+  (d) => ({
+    id: d
+      .varchar({ length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    commentId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => comments.id),
+    userId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => users.id),
+    content: d.text().notNull(),
+    createdAt: d.timestamp({ withTimezone: true }).defaultNow().notNull(),
+  }),
+  (t) => [
+    index("reply_comment_id_idx").on(t.commentId),
+    index("reply_user_id_idx").on(t.userId),
+  ]
+);
+
+export const commentsRelations = relations(comments, ({ one, many }) => ({
+  user: one(users, { fields: [comments.userId], references: [users.id] }),
+  post: one(posts, { fields: [comments.postId], references: [posts.id] }),
+  replies: many(replies),
+}));
+
+export const repliesRelations = relations(replies, ({ one }) => ({
+  comment: one(comments, {
+    fields: [replies.commentId],
+    references: [comments.id],
+  }),
+  user: one(users, { fields: [replies.userId], references: [users.id] }),
+}));
+
+export const upvotesRelations = relations(upvotes, ({ one }) => ({
+  user: one(users, { fields: [upvotes.userId], references: [users.id] }),
+  post: one(posts, { fields: [upvotes.postId], references: [posts.id] }),
+}));
