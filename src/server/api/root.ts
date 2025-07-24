@@ -1,6 +1,7 @@
 import { waitlistRouter } from "@/server/api/routers/waitlist";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { postRouter } from "@/server/api/routers/post";
+import { upvoteRouter } from "./routers/upvotes";
 
 /**
  * This is the primary router for your server.
@@ -10,6 +11,7 @@ import { postRouter } from "@/server/api/routers/post";
 export const appRouter = createTRPCRouter({
   waitlist: waitlistRouter,
   post: postRouter,
+  upvote: upvoteRouter,
 });
 
 // export type definition of API
