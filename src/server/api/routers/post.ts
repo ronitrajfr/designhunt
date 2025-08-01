@@ -10,6 +10,7 @@ import { getRateLimiter } from "@/utils/rate-limit";
 import { getIp } from "@/utils/ip";
 import { TRPCError } from "@trpc/server";
 import { posts, upvotes } from "@/server/db/schema";
+import { generate2DigitNumber } from "@/utils/generate-id";
 
 export const postRouter = createTRPCRouter({
   getPost: publicProcedure
@@ -19,7 +20,12 @@ export const postRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx }) => {
-      const slug = input.slug;
+      let slug = input.slug;
+
+      const isSlugExists = await ctx.db
+        .select()
+        .from(posts)
+        .where(eq(posts.slug, slug));
 
       const [post] = await ctx.db
         .select()
@@ -63,10 +69,23 @@ export const postRouter = createTRPCRouter({
         }
       }
 
+      let slug = input.slug;
+      const existingSlug = await ctx.db
+        .select()
+        .from(posts)
+        .where(eq(posts.slug, slug))
+        .limit(1);
+
+      if (existingSlug.length > 0) {
+        const randomId = generate2DigitNumber();
+        slug = `${slug}-${randomId}`;
+      }
+
       const [newPost] = await ctx.db
         .insert(posts)
         .values({
           ...input,
+          slug,
           createdById: ctx.session.user.id,
         })
         .returning();
